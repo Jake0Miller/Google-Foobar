@@ -1,0 +1,43 @@
+from fractions import gcd
+
+def answer(blist):
+    length = len(blist)
+    
+    # Array of all possible guard combinations
+    guardPairs = [[0 for i in blist] for j in blist]
+    
+    # Mark loop matches with a 1
+    for i in range(length):
+        for j in range(i+1,length):
+            if willTrapGuards(blist[i],blist[j]):
+                guardPairs[i][j] = 1
+                guardPairs[j][i] = 1
+    
+    # initialize array to store matches
+    match = [-1]*length
+    count = 0
+    
+    for i in range(length):
+        visited = [0]*length
+        if dfs(i,match,visited,length,guardPairs):
+            count += 1
+    
+    return length - 2*(count/2)
+
+# helper function to determine when loop occurs
+# sum / greatest common denominator
+# bitwise & returns False if this is a power of 2
+def willTrapGuards(x,y):
+    z = int((x + y) / gcd(x, y))
+    return ((z - 1) & z) != 0
+    
+# DFS
+def dfs(i,match,visited,length,guardPairs):
+    for j in range(length):
+        if guardPairs[i][j] and not visited[j]:
+            visited[j] = 1
+
+            if match[j] == -1 or dfs(match[j],match,visited,length,guardPairs):
+                match[j] = i
+                return True
+    return False
